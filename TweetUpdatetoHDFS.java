@@ -48,15 +48,18 @@ public class TweetUpdatetoHDFS{
     	      int favorit;
     	      int retweet;
     	      String User;
-    	      ArrayList<Tweets> tweetliste = Tweetlisteerstellen();
-    	       path = new Path("twitterprak/Twitterprak.txt");
-    	     Path path2 = new Path("twitterprak2/Twitterprak.json");
-      Path path3 = new Path("wordcount/wordcount.txt");
+    	      path = new Path("twitterprak/Twitterprak.txt");
+     	     Path path2 = new Path("twitterprak2/Twitterprak.json");  
+     	 // Path path3 = new Path("wordcount/wordcount.txt"); 
+    	     for(int e=1;e<20;e++){
+     	     ArrayList<Tweets> tweetliste = Tweetlisteerstellen(e);
+    	      
+     
  
-    	   try{
+    
     		    BufferedWriter br=new BufferedWriter(new OutputStreamWriter(hdfs.append(path)));
     		    BufferedWriter br2=new BufferedWriter(new OutputStreamWriter(hdfs.append(path2)));
-          BufferedWriter br3=new BufferedWriter(new OutputStreamWriter(hdfs.append(path3)));
+       //   BufferedWriter br3=new BufferedWriter(new OutputStreamWriter(hdfs.append(path3)));
                                           // TO append data to a file, use fs.append(Path f)
               for(int i = 0; i<tweetliste.size();i++){
                   //System.out.println("Index" + i + "Länge" + tweetliste.size());
@@ -82,16 +85,16 @@ public class TweetUpdatetoHDFS{
              	 	 br.newLine();
                  	 	 br2.write(value.toJSONString());
                      br2.newLine();
-             	 br3.write(content);
-             		 br3.newLine();
+             //	 br3.write(content);
+             //		 br3.newLine();
                    }
             
                  br.close();
             br2.close();
-              br3.close();
-       }catch(Exception e){
+            //  br3.close();
+    	     }
               // System.out.println("Fehler :( " + e);
-       }
+       
 
         //reading
       /*  
@@ -109,7 +112,7 @@ public class TweetUpdatetoHDFS{
         hdfs.close();
     }
     
-    public static ArrayList<Tweets> Tweetlisteerstellen(){
+    public static ArrayList<Tweets> Tweetlisteerstellen(int o) throws TwitterException{
 	        int[] zeitungsid = {2834511, 222929165, 5494392, 114508061};
 	        //IDs von Zeitungen: Spiegel 2834511; jungeWelt 222929165; focus 5494392, SZ 114508061
 	        String content; //um all newlines rauszuschmeißen
@@ -138,15 +141,18 @@ public class TweetUpdatetoHDFS{
 	          TwitterFactory tf = new TwitterFactory(cb.build());
 	          Twitter twitter = tf.getInstance();
 	        
-	          try {
+	      
 	            List<Status> statuses = null; //List für die Timeline
 	            ArrayList<List<Status>> statusesOS = new ArrayList<List<Status>>(); //Arraylist für die Zeitungen
-	           for(int o=1;o<20;o++) {
+	            
 	            for(int id : zeitungsid){
+	            	
 	              Paging paging = new Paging(o, 40); //max 200
 	              statuses = twitter.getUserTimeline(id, paging); // ,paging returned die timeline
 	              statusesOS.add(statuses); //added die aktuelle timeline zur array liste der Zeitungen
 	            }
+	          
+	           
 	                for (List<Status> timeline : statusesOS){
 	              for (Status status : timeline) {
 	                Tweets tweet = new Tweets();
@@ -165,9 +171,9 @@ public class TweetUpdatetoHDFS{
 	                name=User.getName();
 	                tweet.setUser(name);
 	               
-	               if(vergleich.before(zeit)){
+	              if(vergleich.before(zeit)){
 	                Tweetliste.add(tweet);
-	                }
+	               }
 	                i++;
 	          
 	             //System.out.println("Index" + i + "Kontent" + tweet.getContent() + "\n Favoriten " + tweet.getFavorit() + " Retweet " +tweet.getRetweet() + "\n ID " +tweet.getID() + "\n ZEIT " +tweet.getZeit() + "\n User " +tweet.getUser());
@@ -175,10 +181,8 @@ public class TweetUpdatetoHDFS{
 	              }    
 	            
 	                }
-	           }
-	          } catch (TwitterException e) {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();       }
+	        
+	           
 	        //  System.out.println("Test" + Tweetliste.toString());
 	          return Tweetliste;
 	          }

@@ -163,9 +163,9 @@ public class AddAndReadFile{
     conf.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/mapred-site.xml"));
     conf.set("fs.default.name", "localhost:9000");
     //Addet das File und unten liest das File
-  //  client.addFile("C:/Users/Sun_2/workspace/Twitterprak.json", "twitterprak2", conf);
-   // client.addFile("C:/Users/Sun_2/workspace/Twitterprak.txt", "twitterprak", conf);
-    client.addFile("C:/Users/Sun_2/workspace/Twitter/src/wordcount.txt", "wordcount", conf);
+    client.addFile("C:/Users/Sun_2/workspace/Twitterprak.json", "twitterprak2", conf);
+    client.addFile("C:/Users/Sun_2/workspace/Twitterprak.txt", "twitterprak", conf);
+   // client.addFile("C:/Users/Sun_2/workspace/Twitter/src/wordcount.txt", "wordcount", conf);
     //  client.readFile("twitterprak/Twitterprak.txt", conf);
     //client.schreibeContent("twitterprak/wordcount.txt");
 
