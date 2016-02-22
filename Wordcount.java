@@ -44,12 +44,12 @@ public class Wordcount {
     	ArrayList<Integer> anzahl=new ArrayList<Integer>();
     	String wort=new String();
     	int count=0;
-    	System.out.println(st.size());
+    	//System.out.println(st.size());
     	for(int i = 0; i <st.size(); i++) {
     		Worthaeufigkeit hf =new Worthaeufigkeit();
     		wort =this.st.get(i);
     		if(woerter.contains(wort)==false){
-    			System.out.println(i + " Vergleichswort: " + wort);
+    		//	System.out.println(i + " Vergleichswort: " + wort);
         		woerter.add(wort);
         		hf.setwort(wort);
         		for(int a = 0; a <st.size(); a++){ 
@@ -97,7 +97,7 @@ public class Wordcount {
    	//Was ist das Wort/Thema des Zeitraumes:  
 Wordcount count =new Wordcount();
        String ende1= "Sat Feb 20 21:21:40 CET 2016";
-       String start1 = "Wed Feb 17 21:21:40 CET 2016";
+       String start1 = "Wed Feb 10 21:21:40 CET 2016";
        SimpleDateFormat sdfToDate = new SimpleDateFormat(
                "EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
        Date start = sdfToDate.parse(start1);
