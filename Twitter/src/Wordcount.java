@@ -73,8 +73,9 @@ public class Wordcount {
 
     	words.sort(getComp());
     	for(int i = 0; i < words.size(); i++) {
+    		if(words.get(i).getcount()>1){
     	System.out.println(words.get(i).getwort() + " " + words.get(i).getcount());	
-    		
+    		}
     	}
     	
     	
