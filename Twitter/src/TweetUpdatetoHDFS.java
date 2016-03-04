@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.io.*;
 import org.json.simple.JSONObject;
-
+import org.json.simple.parser.JSONParser;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.*;
@@ -34,32 +34,42 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TweetUpdatetoHDFS{
+	
+  
     public static void main(String[] args) throws Exception {
     	  Configuration obj =new Configuration();
     	  obj.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/core-site.xml"));
     	  obj.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/hdfs-site.xml"));
     	  obj.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/mapred-site.xml"));
     	  obj.set("fs.default.name", "localhost:9000");
+    	  TweetUpdatetoHDFS client = new TweetUpdatetoHDFS();
+    	  client.addFile("C:/Users/Sun_2/workspace/Twitterprak.json", "twitterprak4", obj);
+    	  client.addFile("C:/Users/Sun_2/workspace/Twitterprak.json", "twitterprak3", obj);
+    	  client.addFile("C:/Users/Sun_2/workspace/Twitterprak.json", "twitterprak2", obj);
+    	  client.addFile("C:/Users/Sun_2/workspace/Twitterprak.txt", "twitterprak", obj);
+    	  client.addFile("C:/Users/Sun_2/workspace/Twitter/src/wordcount.txt", "wordcount", obj);
+    	  //  client.readFile("twitterprak/Twitterprak.txt", obj);
+    	  //client.schreibeContent("twitterprak/wordcount.txt");
+    	  
     	  FileSystem hdfs = FileSystem.get(obj);
-    	  Path path = null; 
     	  String content; 
     	      Date zeit;
     	      String key; 
     	      int favorit;
     	      int retweet;
     	      String User;
-    	      path = new Path("twitterprak/Twitterprak.txt");
-     	     Path path2 = new Path("twitterprak2/Twitterprak.json");  
-     	 // Path path3 = new Path("wordcount/wordcount.txt"); 
-    	     for(int e=1;e<20;e++){
-     	     ArrayList<Tweets> tweetliste = Tweetlisteerstellen(e);
-    	      
-     
- 
-    
-    		    BufferedWriter br=new BufferedWriter(new OutputStreamWriter(hdfs.append(path)));
-    		    BufferedWriter br2=new BufferedWriter(new OutputStreamWriter(hdfs.append(path2)));
-       //   BufferedWriter br3=new BufferedWriter(new OutputStreamWriter(hdfs.append(path3)));
+    	 Path path = new Path("twitterprak/Twitterprak.txt");
+     	 Path path2 = new Path("twitterprak2/Twitterprak.json");   	     
+     	 Path path3 = new Path("wordcount/wordcount.txt"); 
+     	 Path path4 = new Path("twitterprak4/Twitterprak.json"); 
+    	     for(int e=1;e<45;e++){
+     	     ArrayList<Tweets> tweetliste = client.Tweetlisteerstellen(e);
+
+     	     
+    	BufferedWriter br=new BufferedWriter(new OutputStreamWriter(hdfs.append(path)));
+    	BufferedWriter br2=new BufferedWriter(new OutputStreamWriter(hdfs.append(path2)));
+        BufferedWriter br3=new BufferedWriter(new OutputStreamWriter(hdfs.append(path3)));
+        BufferedWriter br4=new BufferedWriter(new OutputStreamWriter(hdfs.append(path4)));
                                           // TO append data to a file, use fs.append(Path f)
               for(int i = 0; i<tweetliste.size();i++){
                   //System.out.println("Index" + i + "L‰nge" + tweetliste.size());
@@ -81,38 +91,144 @@ public class TweetUpdatetoHDFS{
                      value.put("retweet", retweet);
                      //System.out.print("JSON Objekt" + value + "\n");
 
-                   br.write(value.toJSONString());
-             	 	 br.newLine();
-                 	 	 br2.write(value.toJSONString());
-                     br2.newLine();
-             //	 br3.write(content);
-             //		 br3.newLine();
+                  br.write(value.toJSONString());
+             		 br.newLine();
+               	 	 br2.write(value.toJSONString());
+                    br2.newLine();
+              br3.write(content);
+             		 br3.newLine();
+             		br4.write(value.toJSONString());
+             		br4.newLine();
                    }
             
-                 br.close();
-            br2.close();
-            //  br3.close();
+              br.close();
+              br2.close();
+              br3.close();
+              br4.close();
     	     }
-              // System.out.println("Fehler :( " + e);
-       
 
-        //reading
-      /*  
-        try{
-            BufferedReader br=new BufferedReader(new InputStreamReader(hdfs.open(path)));
-            String line;
-            line=br.readLine();
-            while (line != null){
-                    //System.out.println(line);
-                    line=br.readLine();
-            }
-    }catch(Exception e){
-    }
-       */
         hdfs.close();
     }
-    
-    public static ArrayList<Tweets> Tweetlisteerstellen(int o) throws TwitterException{
+
+	  /**
+	   * create a existing file from local filesystem to hdfs
+	   * @param source
+	   * @param dest
+	   * @param conf
+	   * @throws IOException
+	   */
+	  public void addFile(String source, String dest, Configuration conf) throws IOException {
+
+	    FileSystem fileSystem = FileSystem.get(conf);
+
+	    // Get the filename out of the file path
+	    String filename = source.substring(source.lastIndexOf('/') + 1,source.length());
+
+	    // Create the destination path including the filename.
+	    if (dest.charAt(dest.length() - 1) != '/') {
+	      dest = dest + "/" + filename;
+	    } else {
+	      dest = dest + filename;
+	    }
+
+	    // System.out.println("Adding file to " + destination);
+
+	    // Check if the file already exists
+	    Path path = new Path(dest);
+	    if (fileSystem.exists(path)) {
+	      System.out.println("File " + dest + " already exists");
+	      return;
+	    }
+
+	    // Create a new file and write data to it.
+	    
+	    FSDataOutputStream out = fileSystem.create(path);
+	    InputStream in = new BufferedInputStream(new FileInputStream(new File(
+	        source)));
+
+	    byte[] b = new byte[1024];
+	    int numBytes = 0;
+	    while ((numBytes = in.read(b)) > 0) {
+	      out.write(b, 0, numBytes);
+	    }
+
+	    // Close all the file descriptors
+	    in.close();
+	    out.close();
+	    fileSystem.close();
+	  }
+
+	  
+	  public ArrayList<Tweets> SchreibeContent (String file) throws FileNotFoundException {
+		    Configuration conf =new Configuration();
+		    conf.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/core-site.xml"));
+		    conf.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/hdfs-site.xml"));
+		    conf.addResource(new Path("C:/cygwin64/usr/local/hadoop-common/hadoop-dist/target/hadoop-2.5.0-SNAPSHOT/etc/hadoop/mapred-site.xml"));
+		    conf.set("fs.default.name", "localhost:9000");
+			JSONParser parser = new JSONParser();
+			ArrayList<Tweets> tweetliste =new ArrayList<Tweets>();
+			
+			Path path = new Path(file);
+			JSONObject obj;
+			FileOutputStream schreibeStrom = 
+	                new FileOutputStream("twitterprak.txt");
+			try {
+				FileSystem fileSystem = FileSystem.get(conf);
+				 BufferedReader br=new BufferedReader(new InputStreamReader(fileSystem.open(path)));
+		            String line;
+		            while ((line = br.readLine()) != null) {
+		            	
+		            obj = (JSONObject) parser.parse(line);
+		           
+		            String content =(String) obj.get("content");
+		            
+		            for (int i=0; i < content.length(); i++){
+		            	schreibeStrom.write((byte)content.charAt(i));
+		            }
+		            
+		            //System.out.println(content);
+	        
+		            }
+
+			}catch(Exception e){System.out.println("hier" + e);}
+			
+			return tweetliste;
+			}
+	  /**
+	   * read a file from hdfs
+	   * @param file
+	   * @param conf
+	   * @throws IOException
+	   */
+	  public void readFile(String file, Configuration conf) throws IOException {
+	    FileSystem fileSystem = FileSystem.get(conf);
+
+	    Path path = new Path(file);
+	    if (!fileSystem.exists(path)) {
+	      System.out.println("File " + file + " does not exists" + path);
+	      return;
+	    }
+
+	    FSDataInputStream in = fileSystem.open(path);
+
+	    String filename = file.substring(file.lastIndexOf('/') + 1,
+	        file.length());
+
+	    OutputStream out = new BufferedOutputStream(new FileOutputStream(
+	        new File(filename)));
+
+	    byte[] b = new byte[1024];
+	    int numBytes = 0;
+	    while ((numBytes = in.read(b)) > 0) {
+	      out.write(b, 0, numBytes);
+	    }
+
+	    in.close();
+	    out.close();
+	    fileSystem.close();
+	  }
+	
+    public ArrayList<Tweets> Tweetlisteerstellen(int o) throws TwitterException{
 	        int[] zeitungsid = {2834511, 222929165, 5494392, 114508061};
 	        //IDs von Zeitungen: Spiegel 2834511; jungeWelt 222929165; focus 5494392, SZ 114508061
 	        String content; //um all newlines rauszuschmeiﬂen
